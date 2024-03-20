@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursos - SpeakUp</title>
+    <style>
+        body {
+            font-family: serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Mínimo 100% del viewport height */
+        }
+
+        .menu {
+            background-color: #FFEFBA;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .menu ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .menu ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+
+        .menu ul li a {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 20px;
+            flex: 1; /* El contenido se expandirá para llenar el espacio restante */
+        }
+
+        .courses {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Centra los cursos horizontalmente */
+        }
+
+        .course {
+            background-color: #f5f5f5; /* Gris muy claro */
+            padding: 20px;
+            margin: 0 20px 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: calc(33.33% - 20px); /* Ajustado para tres columnas */
+        }
+
+        .course h2 {
+            color: #333;
+        }
+
+        footer {
+            background-color: #FFEFBA;
+            color: #333;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            line-height: 50px; /* Igualar la altura del texto con la altura del contenedor */
+        }
+
+        footer p {
+            margin: 0; /* Eliminar el margen predeterminado del párrafo */
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú superior -->
+    <div class="menu">
+        <ul>
+            <li><a href="{% url 'home' %}">Inicio</a></li>
+            <li><a href="{% url 'about' %}">Así funciona</a></li>
+            <li><a href="{% url 'profile' %}">Perfil</a></li>
+            <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+        </ul>
+    </div>
+
+    <!-- Contenido de la página de cursos -->
+    <div class="content">
+        <h1 style="text-align: center;">Cursos Disponibles</h1>
+        <div class="courses">
+            {% for course in courses %}
+            <div class="course">
+                <h2><a href="{% url 'course_detail' course.title %}">{{ course.title }}</a></h2>
+                <p>{{ course.description }}</p>
+                {% if course.image %}
+                <img src="{{ course.image.url }}" alt="{{ course.title }}">
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer>
+        Derechos reservados &copy; 2024 SpeakUp
+    </footer>
+</body>
+</html>

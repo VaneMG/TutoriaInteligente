@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <style>
+        body {
+            background-color: #FFEFBA; /* Fondo amarillo bebé */
+            font-family: serif; /* Cambio del tipo de letra a serif */
+        }
+
+        .container {
+            width: 50%;
+            margin: 50px auto; /* Centrado vertical y horizontalmente */
+            padding: 20px;
+            background-color: #ffffff; /* Fondo blanco */
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fieldWrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .fieldWrapper label {
+            margin-right: 10px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #ffffff; /* Fondo blanco */
+            color: #000000; /* Texto negro */
+            border: 1px solid #000000; /* Borde negro */
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #f0f0f0; /* Cambio de color al pasar el mouse */
+        }
+
+        p {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Registro</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }} <!-- Muestra los errores generales del formulario -->
+            <div class="fieldWrapper">
+                <label for="{{ form.username.id_for_label }}">Usuario:</label>
+                {{ form.username }} <!-- Campo de usuario -->
+            </div>
+            <div class="fieldWrapper">
+                <label for="{{ form.password1.id_for_label }}">Contraseña:</label>
+                {{ form.password1 }} <!-- Campo de contraseña -->
+            </div>
+            <div class="fieldWrapper">
+                <label for="{{ form.password2.id_for_label }}">Confirmar contraseña:</label>
+                {{ form.password2 }} <!-- Campo de confirmación de contraseña -->
+            </div>
+            <button type="submit">Registrarse</button>
+        </form>
+        <p>¿Ya tienes una cuenta? <a href="{% url 'login' %}">Iniciar sesión</a></p>
+    </div>
+</body>
+</html>
