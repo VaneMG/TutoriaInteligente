@@ -120,6 +120,6 @@ def activity_detail(request, activity_id):
 
         # Devolver el resultado como JSON
         return JsonResponse({'total_score': total_score, 'final_score': activity.score})
-
+    
     # Si no es una solicitud POST, renderizar la plantilla con los datos de la actividad y las preguntas
     return render(request, 'activity_detail.html', {'activity': activity, 'preguntas': preguntas, 'total_score': total_score})

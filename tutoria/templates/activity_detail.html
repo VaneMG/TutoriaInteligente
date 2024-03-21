@@ -104,19 +104,25 @@
     </style>
 </head>
 <body>
-<!-- Contenido de la página -->
+    <div class="menu">
+        <ul>
+            <li><a href="#">Inicio</a></li>
+            <li><a href="#">Actividades</a></li>
+            <li><a href="#">Perfil</a></li>
+            <li><a href="#">Cerrar Sesión</a></li>
+        </ul>
+    </div>
 <div class="content">
     <h1>Detalles de la Actividad</h1>
     <form method="post" class="evaluation-form" id="activity-form">
         {% csrf_token %}
         <input type="hidden" name="activity_id" value="{{ activity.id }}">
-        <!-- Preguntas y opciones -->
         {% for pregunta in preguntas %}
         <div class="question">
             <label>{{ pregunta.texto }}</label><br>
             {% for opcion in pregunta.opcionrespuesta_set.all %}
             <label style="display: inline-block; margin-right: 10px; font-size: 14px;">
-                <input type="radio" id="opcion_{{ pregunta.id }}_{{ opcion.id }}" name="question_{{ pregunta.id }}" value="{{ opcion.id }}">
+                <input type="radio" name="question_{{ pregunta.id }}" value="{{ opcion.id }}">
                 {{ opcion.texto }}
             </label>
             {% endfor %}
@@ -125,29 +131,32 @@
         <button type="submit" class="submit-button" id="submit-button">Enviar respuestas</button>
     </form>
 
-    <!-- Mostrar el puntaje total y la calificación final -->
     <div class="score-container" id="score-container" style="display: none;">
         <p>Puntaje total: <span id="total-score"></span></p>
         <p>Calificación final: <span id="final-score"></span></p>
     </div>
 
-    <!-- Botón para volver a actividades -->
     <div id="back-to-activities-container" style="display: none;">
         <a href="{% url 'activities' %}"><button>Volver a Actividades</button></a>
     </div>
 </div>
 
-<!-- Scripts JavaScript -->
+<footer>
+    <p>Derechos Reservados &copy; 2024</p>
+</footer>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Función para enviar el formulario al servidor cuando se hace clic en el botón
-        document.getElementById('submit-button').addEventListener('click', function() {
+        document.getElementById('submit-button').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado del formulario
+
             // Obtener el formulario
             var form = document.getElementById('activity-form');
             // Enviar el formulario al servidor utilizando AJAX
             var formData = new FormData(form);
             var xhr = new XMLHttpRequest();
-            xhr.open(form.method, form.action);
+            xhr.open('POST', '{% url "activity_detail" activity.id %}');
             xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
