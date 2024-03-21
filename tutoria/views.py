@@ -7,6 +7,7 @@ from django.db.models import F
 from .models import Course, Activity, Student, Progress, OpcionRespuesta, RespuestaUsuario, Pregunta
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from django.db import transaction
 
 
 def home(request):
@@ -38,11 +39,8 @@ def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            auth_login(request, user)
+            user = form.save()
+            student = Student.objects.create(user=user, name=user.username)
             messages.success(request, '¡Registro exitoso! Ahora puedes iniciar sesión.')
             return redirect('home')
         else:
@@ -102,22 +100,26 @@ def activity_detail(request, activity_id):
     total_score = 0
 
     if request.method == 'POST':
-        # Inicializar variables para el puntaje total y el número total de preguntas
-        total_questions = 0
-
+        # Obtener el estudiante asociado al usuario que inició sesión
+        student = request.user.student
+        
         # Guardar las respuestas del usuario en la base de datos y calcular el puntaje total
         for pregunta in preguntas:
             question_id = f'question_{pregunta.id}'
             selected_answer_id = request.POST.get(question_id)
             if selected_answer_id is not None:
-                total_questions += 1
+                total_score += 1
                 selected_answer = OpcionRespuesta.objects.get(pk=selected_answer_id)
-                if selected_answer.es_correcta:
-                    total_score += 1
+                # Guardar la respuesta del usuario en la tabla RespuestaUsuario
+                RespuestaUsuario.objects.create(pregunta=pregunta, opcion_elegida=selected_answer, estudiante=student)
 
-        # Devolver el puntaje total como una respuesta JSON
-        score_html = f'<p>Puntaje total: {total_score} correctas de {preguntas.count()} preguntas</p>'
-        return JsonResponse({'score_html': score_html})
+        # Calcular la calificación final y actualizar el atributo score en la tabla Activity
+        final_score = (total_score / preguntas.count()) * 100
+        activity.score = final_score
+        activity.save()
 
-    # Renderizar la página de detalles de la actividad con el formulario
+        # Devolver el resultado como JSON
+        return JsonResponse({'total_score': total_score, 'final_score': activity.score})
+
+    # Si no es una solicitud POST, renderizar la plantilla con los datos de la actividad y las preguntas
     return render(request, 'activity_detail.html', {'activity': activity, 'preguntas': preguntas, 'total_score': total_score})

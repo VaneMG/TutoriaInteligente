@@ -1,10 +1,18 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Student(models.Model):
+    NIVEL_IDIOMA_CHOICES = [
+        ('basico', 'Básico'),
+        ('intermedio', 'Intermedio'),
+        ('avanzado', 'Avanzado'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, default=1)
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    age = models.PositiveIntegerField()
+    areas_mejora = models.TextField(null=True, blank=True, default=None)  # Agregar campo de áreas de mejora
+    nivel_idioma = models.CharField(max_length=20, choices=NIVEL_IDIOMA_CHOICES, null=True, blank=True, default=None)
 
     def __str__(self):
         return self.name
@@ -46,11 +54,11 @@ class RespuestaUsuario(models.Model):
     pregunta = models.ForeignKey('Pregunta', on_delete=models.CASCADE)
     opcion_elegida = models.ForeignKey('OpcionRespuesta', on_delete=models.CASCADE)
     puntaje_obtenido = models.IntegerField(default=0)
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, default=None, null=True)
+    estudiante = models.ForeignKey(Student, on_delete=models.CASCADE, default=None)  # Relación con la tabla Student para heredar el nombre del estudiante
 
     def __str__(self):
-        return f"Respuesta de {self.pregunta.texto}"
-
+        return f"Respuesta de {self.pregunta.texto} por {self.estudiante.name if self.estudiante else 'Anónimo'}"
+    
 class Progress(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
