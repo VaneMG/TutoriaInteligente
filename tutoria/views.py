@@ -121,6 +121,29 @@ def activity_detail(request, activity_id):
         activity.score = final_score
         activity.save()
 
+        # Si el ID de la actividad es 1, calcular el nivel de idioma basado en la calificación final
+        if activity.id == 1:
+            student = request.user.student
+            if final_score <= 60:
+                student.nivel_idioma = 'basico'
+            elif final_score <= 80:
+                student.nivel_idioma = 'intermedio'
+            else:
+                student.nivel_idioma = 'avanzado'
+            student.save()
+
+            # Actualizar el progreso del estudiante
+            with transaction.atomic():
+                progress, created = Progress.objects.get_or_create(student=student, activity=activity)
+                progress.completed = True
+                progress.save()
+
+        # Si la actividad es diferente de 1 y el puntaje es igual o menor a 50, agregar el nombre de la actividad a areas_mejora
+        elif final_score <= 50:
+            student = request.user.student
+            student.areas_mejora = student.areas_mejora + f'{activity.title}, '
+            student.save()
+
         # Devolver el resultado como JSON
         return JsonResponse({'total_score': total_score, 'final_score': activity.score})
     

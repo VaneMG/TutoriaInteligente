@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import path
 from tutoria import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -17,4 +19,5 @@ urlpatterns = [
     path('course/<str:course_name>/', views.course_detail, name='course_detail'),  # Ruta para ver detalles del curso por nombre
     path('activities/', views.activities, name='activities'),
     path('activity/<int:activity_id>/', views.activity_detail, name='activity_detail'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
