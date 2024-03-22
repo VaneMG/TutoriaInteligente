@@ -29,7 +29,6 @@ class Activity(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     description = models.TextField()
-    score = models.DecimalField(max_digits=5, decimal_places=2, default=0)  # Campo para almacenar el puntaje
 
     def __str__(self):
         return self.name
@@ -53,8 +52,8 @@ class OpcionRespuesta(models.Model):
 class RespuestaUsuario(models.Model):
     pregunta = models.ForeignKey('Pregunta', on_delete=models.CASCADE)
     opcion_elegida = models.ForeignKey('OpcionRespuesta', on_delete=models.CASCADE)
-    puntaje_obtenido = models.IntegerField(default=0)
     estudiante = models.ForeignKey(Student, on_delete=models.CASCADE, default=None)  # Relación con la tabla Student para heredar el nombre del estudiante
+    score = models.DecimalField(max_digits=5, decimal_places=2, default=0)  # Campo para almacenar el puntaje
 
     def __str__(self):
         return f"Respuesta de {self.pregunta.texto} por {self.estudiante.name if self.estudiante else 'Anónimo'}"

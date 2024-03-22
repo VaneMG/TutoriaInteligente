@@ -111,7 +111,10 @@ def activity_detail(request, activity_id):
                 total_score += 1
                 selected_answer = OpcionRespuesta.objects.get(pk=selected_answer_id)
                 # Guardar la respuesta del usuario en la tabla RespuestaUsuario
-                RespuestaUsuario.objects.create(pregunta=pregunta, opcion_elegida=selected_answer, estudiante=student)
+                respuesta_usuario = RespuestaUsuario.objects.create(pregunta=pregunta, opcion_elegida=selected_answer, estudiante=student)
+                # Calcular la calificación de la pregunta y guardarla en el campo score de RespuestaUsuario
+                respuesta_usuario.score = 100 / preguntas.count()  # Asignar 100 puntos divididos por el número de preguntas como puntaje por pregunta
+                respuesta_usuario.save()
 
         # Calcular la calificación final y actualizar el atributo score en la tabla Activity
         final_score = (total_score / preguntas.count()) * 100
