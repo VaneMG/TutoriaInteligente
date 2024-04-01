@@ -26,12 +26,23 @@ class Course(models.Model):
         return self.title
 
 class Activity(models.Model):
+    BASIC = 'basico'
+    INTERMEDIATE = 'intermedio'
+    ADVANCED = 'avanzado'
+    LEVEL_CHOICES = [
+        (BASIC, 'Básico'),
+        (INTERMEDIATE, 'Intermedio'),
+        (ADVANCED, 'Avanzado'),
+    ]
+
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     description = models.TextField()
+    nivel = models.CharField(max_length=20, choices=LEVEL_CHOICES, null=True, default=None)
 
     def __str__(self):
         return self.name
+
         
 class Pregunta(models.Model):
     texto = models.TextField()

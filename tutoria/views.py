@@ -17,11 +17,6 @@ def course_detail(request, course_name):
     course = get_object_or_404(Course, title=course_name)
     return render(request, 'course_detail.html', {'course': course})
 
-def student_detail(request, student_id):
-    student = get_object_or_404(Student, pk=student_id)
-    progress = Progress.objects.filter(student=student)
-    return render(request, 'student_detail.html', {'student': student, 'progress': progress})
-
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
@@ -72,12 +67,21 @@ def about(request):
     return render(request, 'about.html')
 
 def profile(request):
+    # Obtener el usuario que ha iniciado sesión
     user = request.user
+
     try:
+        # Buscar el estudiante asociado a ese usuario
         student = Student.objects.get(user=user)
-        progress = Progress.objects.filter(student=student)
+        
+        # Obtener el progreso del estudiante (actividades completadas)
+        progress = Progress.objects.filter(student=student, completed=True)
+
+        # Pasar los datos al template 'profile.html'
         return render(request, 'profile.html', {'student': student, 'progress': progress})
+    
     except Student.DoesNotExist:
+        # Si no se encuentra información del estudiante asociada al usuario, mostrar un mensaje de error
         messages.error(request, 'No se encontró información de estudiante asociada a este usuario.')
         return redirect('home')
 
