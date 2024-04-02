@@ -90,8 +90,21 @@ def courses(request):
     return render(request, 'courses.html', {'courses': courses})
 
 def activities(request):
-    activities = Activity.objects.all()  # Obtener todas las actividades desde la base de datos
+    # Obtener todas las actividades desde la base de datos
+    activities = Activity.objects.all()
+
+    # Obtener el estudiante asociado al usuario que ha iniciado sesión
+    student = request.user.student
+
+    # Obtener el progreso del estudiante para la actividad 1 (si existe)
+    progress_activity_1 = Progress.objects.filter(student=student, activity_id=1).first()
+
+    # Si la actividad 1 ya ha sido completada, filtrar las actividades para que no incluyan la actividad 1
+    if progress_activity_1 and progress_activity_1.completed:
+        activities = activities.exclude(id=1)
+
     return render(request, 'activities.html', {'activities': activities})
+
 
 def activity_detail(request, activity_id):
     # Obtener la actividad

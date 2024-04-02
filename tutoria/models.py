@@ -26,6 +26,7 @@ class Course(models.Model):
         return self.title
 
 class Activity(models.Model):
+    EVALUACION = 'evaluacion'
     BASIC = 'basico'
     INTERMEDIATE = 'intermedio'
     ADVANCED = 'avanzado'
@@ -33,6 +34,7 @@ class Activity(models.Model):
         (BASIC, 'Básico'),
         (INTERMEDIATE, 'Intermedio'),
         (ADVANCED, 'Avanzado'),
+        (EVALUACION, 'Evaluación'),  # Agregar la opción de evaluación
     ]
 
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
