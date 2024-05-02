@@ -90,16 +90,35 @@
             <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
         </ul>
     </div>
+ <!-- Contenido de la página -->
+ <div class="content">
+    <h1>Lista de Actividades</h1>
 
-    <!-- Contenido de la página de lista de actividades -->
-    <div class="content">
-        <h1>Lista de Actividades</h1>
-        <ul>
-            {% for activity in activities %}
+    <!-- Mostrar las actividades recomendadas si el examen de evaluación está completado -->
+{% if has_language_assessment_completed %}
+{% if recommended_activities %}
+    <ul>
+        {% for activity in recommended_activities %}
             <li><a href="{% url 'activity_detail' activity.id %}">{{ activity.name }}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No hay actividades recomendadas disponibles.</p>
+{% endif %}
+{% else %}
+<p>Por favor, completa el examen de evaluación de idioma para ver las actividades recomendadas.</p>
+<!-- Verificar que language_assessment tenga un ID antes de intentar generar la URL -->
+{% if language_assessment %}
+    <p><a href="{% url 'activity_detail' language_assessment.id %}">{{ language_assessment.name }}</a></p>
+{% else %}
+    <p>No se encontró la actividad de evaluación de idioma.</p>
+{% endif %}
+{% endif %}
+
+</div>
+
+
+
 
     <!-- Pie de página -->
     <footer>

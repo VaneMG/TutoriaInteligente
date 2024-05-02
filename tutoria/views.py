@@ -5,9 +5,11 @@ from django.contrib.auth import login as auth_login, logout as auth_logout, auth
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from .models import Course, Activity, Student, Progress, OpcionRespuesta, RespuestaUsuario, Pregunta
+from .recommendation_logic import recommend_activities
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.db import transaction
+import uuid
 
 
 def home(request):
@@ -89,23 +91,45 @@ def courses(request):
     courses = Course.objects.all()
     return render(request, 'courses.html', {'courses': courses})
 
-def activities(request):
-    # Obtener todas las actividades desde la base de datos
-    activities = Activity.objects.all()
+from django.db.models import Count
 
+@login_required
+def activities(request):
     # Obtener el estudiante asociado al usuario que ha iniciado sesión
     student = request.user.student
 
-    # Obtener el progreso del estudiante para la actividad 1 (si existe)
-    progress_activity_1 = Progress.objects.filter(student=student, activity_id=1).first()
+    # Obtener todas las actividades completadas por el estudiante
+    completed_activities = Progress.objects.filter(student=student, completed=True)
 
-    # Si la actividad 1 ya ha sido completada, filtrar las actividades para que no incluyan la actividad 1
-    if progress_activity_1 and progress_activity_1.completed:
-        activities = activities.exclude(id=1)
+    # Obtener la evaluación de idioma del estudiante si está disponible
+    language_assessment = Activity.objects.filter(name='Evaluación - Nivel Aprendizaje').first()
 
-    return render(request, 'activities.html', {'activities': activities})
+    # Verificar si el examen de evaluación de idioma está completado
+    has_language_assessment_completed = False
+    if language_assessment:
+        has_language_assessment_completed = language_assessment.id in [activity.activity.id for activity in completed_activities]
+
+    # Obtener las actividades recomendadas que aún no han sido completadas
+    recommended_activities = []
+    if has_language_assessment_completed:
+        recommended_activities = recommend_activities(student)  # Llamar a la función recommend_activities para obtener las actividades recomendadas
+
+    # Imprimir el contenido del contexto para verificar las actividades recomendadas
+    print("Contenido del contexto:", recommended_activities)
+
+    # Pasar las variables de contexto a la plantilla
+    context = {
+        'recommended_activities': recommended_activities,
+        'has_language_assessment_completed': has_language_assessment_completed,
+        'language_assessment': language_assessment  # Pasar la actividad de evaluación de idioma al contexto
+    }
+
+    # Renderizar la plantilla con las variables de contexto
+    return render(request, 'activities.html', context)
 
 
+
+@login_required
 def activity_detail(request, activity_id):
     # Obtener la actividad
     activity = get_object_or_404(Activity, pk=activity_id)
@@ -163,6 +187,26 @@ def activity_detail(request, activity_id):
 
         # Devolver el resultado como JSON
         return JsonResponse({'total_score': total_score, 'final_score': activity.score})
-    
-    # Si no es una solicitud POST, renderizar la plantilla con los datos de la actividad y las preguntas
+
+    # Si no es una solicitud POST o si aún no se ha enviado el formulario, renderizar la plantilla con los datos de la actividad y las preguntas
     return render(request, 'activity_detail.html', {'activity': activity, 'preguntas': preguntas, 'total_score': total_score})
+# IMPLEMENTACIÓN DEL PATRON SINGLETON
+
+class SessionManager:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(SessionManager, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+
+    def __init__(self):
+        self.sessions = {}
+
+    def create_session(self, user_id):
+        session_id = str(uuid.uuid4())  # Genera un UUID único
+        self.sessions[session_id] = user_id
+        return session_id
+
+    def get_user_id(self, session_id):
+        return self.sessions.get(session_id)
