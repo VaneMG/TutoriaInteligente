@@ -34,13 +34,15 @@ class Activity(models.Model):
         (BASIC, 'Básico'),
         (INTERMEDIATE, 'Intermedio'),
         (ADVANCED, 'Avanzado'),
-        (EVALUACION, 'Evaluación'),  # Agregar la opción de evaluación
+        (EVALUACION, 'Evaluación'),  
     ]
 
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     description = models.TextField()
     nivel = models.CharField(max_length=20, choices=LEVEL_CHOICES, null=True, default=None)
+    score = models.FloatField(null=True, blank=True)  
+    
 
     def __str__(self):
         return self.name
@@ -75,6 +77,15 @@ class Progress(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
+    score = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.student.name} - {self.activity.name}"
+    
+class Notification(models.Model):
+    student = models.ForeignKey('Student', on_delete=models.CASCADE)
+    message = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.message

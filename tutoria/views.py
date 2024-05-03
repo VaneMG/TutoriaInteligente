@@ -4,16 +4,22 @@ from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, Auth
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
-from .models import Course, Activity, Student, Progress, OpcionRespuesta, RespuestaUsuario, Pregunta
+from .models import Course, Activity, Student, Progress, OpcionRespuesta, RespuestaUsuario, Pregunta, Notification
 from .recommendation_logic import recommend_activities
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.db import transaction
 import uuid
+from django.utils import timezone
+from django.db import IntegrityError 
 
 
 def home(request):
     return render(request, 'home.html')
+
+def courses(request):
+    courses = Course.objects.all()
+    return render(request, 'courses.html', {'courses': courses})
 
 def course_detail(request, course_name):
     course = get_object_or_404(Course, title=course_name)
@@ -79,20 +85,25 @@ def profile(request):
         # Obtener el progreso del estudiante (actividades completadas)
         progress = Progress.objects.filter(student=student, completed=True)
 
+        # Obtener las notificaciones para este estudiante
+        notifications = Notification.objects.filter(student=student).order_by('-timestamp')
+        
+        # Crear una lista para almacenar información de cada actividad completada
+        completed_activities = []
+        for progress_item in progress:
+            activity = progress_item.activity
+            # Obtener la calificación final de la actividad desde el progreso
+            score = progress_item.score
+            completed_activities.append({'activity': activity, 'score': score})
+
         # Pasar los datos al template 'profile.html'
-        return render(request, 'profile.html', {'student': student, 'progress': progress})
+        return render(request, 'profile.html', {'student': student, 'completed_activities': completed_activities, 'notifications': notifications})
     
     except Student.DoesNotExist:
         # Si no se encuentra información del estudiante asociada al usuario, mostrar un mensaje de error
         messages.error(request, 'No se encontró información de estudiante asociada a este usuario.')
         return redirect('home')
-
-def courses(request):
-    courses = Course.objects.all()
-    return render(request, 'courses.html', {'courses': courses})
-
-from django.db.models import Count
-
+    
 @login_required
 def activities(request):
     # Obtener el estudiante asociado al usuario que ha iniciado sesión
@@ -127,10 +138,11 @@ def activities(request):
     # Renderizar la plantilla con las variables de contexto
     return render(request, 'activities.html', context)
 
-
-
 @login_required
 def activity_detail(request, activity_id):
+    # Obtener el estudiante asociado al usuario que inició sesión
+    student = request.user.student
+    
     # Obtener la actividad
     activity = get_object_or_404(Activity, pk=activity_id)
     
@@ -149,47 +161,67 @@ def activity_detail(request, activity_id):
             question_id = f'question_{pregunta.id}'
             selected_answer_id = request.POST.get(question_id)
             if selected_answer_id is not None:
-                total_score += 1
                 selected_answer = OpcionRespuesta.objects.get(pk=selected_answer_id)
+                # Verificar si la opción seleccionada es correcta
+                if selected_answer.es_correcta:
+                    total_score += 1
                 # Guardar la respuesta del usuario en la tabla RespuestaUsuario
                 respuesta_usuario = RespuestaUsuario.objects.create(pregunta=pregunta, opcion_elegida=selected_answer, estudiante=student)
-                # Calcular la calificación de la pregunta y guardarla en el campo score de RespuestaUsuario
-                respuesta_usuario.score = 100 / preguntas.count()  # Asignar 100 puntos divididos por el número de preguntas como puntaje por pregunta
-                respuesta_usuario.save()
 
         # Calcular la calificación final y actualizar el atributo score en la tabla Activity
         final_score = (total_score / preguntas.count()) * 100
         activity.score = final_score
         activity.save()
 
-        # Si el ID de la actividad es 1, calcular el nivel de idioma basado en la calificación final
-        if activity.id == 1:
-            student = request.user.student
-            if final_score <= 60:
-                student.nivel_idioma = 'basico'
-            elif final_score <= 80:
-                student.nivel_idioma = 'intermedio'
-            else:
-                student.nivel_idioma = 'avanzado'
+        # Si el puntaje es menor o igual a 50, agregar el nombre de la actividad a areas_mejora del estudiante
+        if final_score <= 50:
+            if student.areas_mejora is None:
+                student.areas_mejora = ''
+            student.areas_mejora += f'{activity.name}, '
             student.save()
 
-            # Actualizar el progreso del estudiante
+            # Crear una notificación para esta actividad completada con calificación baja
             with transaction.atomic():
-                progress, created = Progress.objects.get_or_create(student=student, activity=activity)
-                progress.completed = True
-                progress.save()
+                notification_message = f"Has completado la actividad '{activity.name}' con una calificación baja."
+                try:
+                    new_notification = Notification.objects.create(student=student, message=notification_message, timestamp=timezone.now())
+                    print("Nueva notificación creada:", new_notification)    
+                except IntegrityError as e:
+                    print("Error al crear la notificación:", e)
 
-        # Si la actividad es diferente de 1 y el puntaje es igual o menor a 50, agregar el nombre de la actividad a areas_mejora
-        elif final_score <= 50:
-            student = request.user.student
-            student.areas_mejora = student.areas_mejora + f'{activity.title}, '
-            student.save()
+        # Actualizar el progreso del estudiante
+        with transaction.atomic():
+            progress, created = Progress.objects.get_or_create(student=student, activity=activity)
+            progress.completed = True
+            progress.score = final_score  # Actualizar el puntaje en el progreso
+            progress.save()
+
+            # Si el ID de la actividad es 1, calcular el nivel de idioma basado en la calificación final
+            if activity.id == 1:
+                if final_score <= 60:
+                    student.nivel_idioma = 'basico'
+                elif final_score <= 80:
+                    student.nivel_idioma = 'intermedio'
+                else:
+                    student.nivel_idioma = 'avanzado'
+                student.save()
+
+                # Crear una notificación para esta actividad completada
+                notification_message = f"Has completado la actividad '{activity.name}'"
+                try:
+                    new_notification = Notification.objects.create(student=student, message=notification_message, timestamp=timezone.now())
+                    print("Nueva notificación creada:", new_notification)    
+                except IntegrityError as e:
+                    print("Error al crear la notificación:", e)
 
         # Devolver el resultado como JSON
         return JsonResponse({'total_score': total_score, 'final_score': activity.score})
 
     # Si no es una solicitud POST o si aún no se ha enviado el formulario, renderizar la plantilla con los datos de la actividad y las preguntas
     return render(request, 'activity_detail.html', {'activity': activity, 'preguntas': preguntas, 'total_score': total_score})
+
+
+
 # IMPLEMENTACIÓN DEL PATRON SINGLETON
 
 class SessionManager:

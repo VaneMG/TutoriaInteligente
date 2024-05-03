@@ -92,6 +92,7 @@
     <!-- Contenido de la página de cursos -->
     <div class="content">
         <h1 style="text-align: center;">Cursos Disponibles</h1>
+        {% if courses %}
         <div class="courses">
             {% for course in courses %}
             <div class="course">
@@ -103,6 +104,9 @@
             </div>
             {% endfor %}
         </div>
+        {% else %}
+        <p>No hay cursos disponibles en este momento. Por favor, revisa más tarde.</p>
+        {% endif %}
     </div>
 
     <!-- Pie de página -->
