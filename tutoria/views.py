@@ -74,6 +74,8 @@ def logout_view(request):
 def about(request):
     return render(request, 'about.html')
 
+# IMPLEMENTA PATRON OBSERVER PARA NOTIFICACIONES
+
 def profile(request):
     # Obtener el usuario que ha iniciado sesión
     user = request.user
@@ -123,7 +125,8 @@ def activities(request):
     # Obtener las actividades recomendadas que aún no han sido completadas
     recommended_activities = []
     if has_language_assessment_completed:
-        recommended_activities = recommend_activities(student)  # Llamar a la función recommend_activities para obtener las actividades recomendadas
+        # Obtener las actividades recomendadas excluyendo aquellas completadas con una calificación alta (mayor a 80)
+        recommended_activities = recommend_activities(student).exclude(score__gt=80)
 
     # Imprimir el contenido del contexto para verificar las actividades recomendadas
     print("Contenido del contexto:", recommended_activities)
@@ -137,6 +140,7 @@ def activities(request):
 
     # Renderizar la plantilla con las variables de contexto
     return render(request, 'activities.html', context)
+
 
 @login_required
 def activity_detail(request, activity_id):
@@ -219,8 +223,6 @@ def activity_detail(request, activity_id):
 
     # Si no es una solicitud POST o si aún no se ha enviado el formulario, renderizar la plantilla con los datos de la actividad y las preguntas
     return render(request, 'activity_detail.html', {'activity': activity, 'preguntas': preguntas, 'total_score': total_score})
-
-
 
 # IMPLEMENTACIÓN DEL PATRON SINGLETON
 
