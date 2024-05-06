@@ -12,6 +12,8 @@ from django.db import transaction
 import uuid
 from django.utils import timezone
 from django.db import IntegrityError 
+from django.core.paginator import Paginator, EmptyPage
+from collections.abc import Iterable, Iterator
 
 
 def home(request):
@@ -75,7 +77,6 @@ def about(request):
     return render(request, 'about.html')
 
 # IMPLEMENTA PATRON OBSERVER PARA NOTIFICACIONES
-
 def profile(request):
     # Obtener el usuario que ha iniciado sesión
     user = request.user
@@ -141,6 +142,18 @@ def activities(request):
     # Renderizar la plantilla con las variables de contexto
     return render(request, 'activities.html', context)
 
+# IMPLEMENTACIÓN DEL PATRON DE ITERADOR PARA MOSTRAR LAS PREGUNTAS
+class PreguntaIterator(Iterator):
+    def __init__(self, preguntas):
+        self._preguntas = preguntas
+        self._index = 0
+
+    def __next__(self):
+        if self._index < len(self._preguntas):
+            pregunta = self._preguntas[self._index]
+            self._index += 1
+            return pregunta
+        raise StopIteration
 
 @login_required
 def activity_detail(request, activity_id):
@@ -153,6 +166,9 @@ def activity_detail(request, activity_id):
     # Obtener todas las preguntas asociadas con la actividad
     preguntas = Pregunta.objects.filter(activity=activity).prefetch_related('opcionrespuesta_set')
 
+    # Crear el iterador de preguntas
+    pregunta_iterator = PreguntaIterator(preguntas)
+
     # Inicializar total_score como cero en caso de no ser una solicitud POST
     total_score = 0
 
@@ -161,7 +177,7 @@ def activity_detail(request, activity_id):
         student = request.user.student
         
         # Guardar las respuestas del usuario en la base de datos y calcular el puntaje total
-        for pregunta in preguntas:
+        for pregunta in pregunta_iterator:
             question_id = f'question_{pregunta.id}'
             selected_answer_id = request.POST.get(question_id)
             if selected_answer_id is not None:
@@ -222,7 +238,7 @@ def activity_detail(request, activity_id):
         return JsonResponse({'total_score': total_score, 'final_score': activity.score})
 
     # Si no es una solicitud POST o si aún no se ha enviado el formulario, renderizar la plantilla con los datos de la actividad y las preguntas
-    return render(request, 'activity_detail.html', {'activity': activity, 'preguntas': preguntas, 'total_score': total_score})
+    return render(request, 'activity_detail.html', {'activity': activity, 'preguntas': pregunta_iterator, 'total_score': total_score})
 
 # IMPLEMENTACIÓN DEL PATRON SINGLETON
 
