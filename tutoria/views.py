@@ -111,13 +111,17 @@ def profile(request):
             score = progress_item.score
             completed_activities.append({'activity': activity, 'score': score})
 
-        # Pasar los datos al template 'profile.html'
-        return render(request, 'profile.html', {'student': student, 'completed_activities': completed_activities, 'notifications': notifications})
+        # Obtener las áreas de mejora del estudiante
+        student_activities = student.areas_mejora.split(", ")[:-1]
+
+        # Pasar los datos al template 'profile.html', incluyendo student_activities
+        return render(request, 'profile.html', {'student': student, 'completed_activities': completed_activities, 'notifications': notifications, 'student_activities': student_activities})
     
     except Student.DoesNotExist:
         # Si no se encuentra información del estudiante asociada al usuario, mostrar un mensaje de error
         messages.error(request, 'No se encontró información de estudiante asociada a este usuario.')
         return redirect('home')
+
     
 @login_required
 def activities(request):
@@ -209,8 +213,13 @@ def activity_detail(request, activity_id):
         if final_score <= 50:
             if student.areas_mejora is None:
                 student.areas_mejora = ''
-            student.areas_mejora += f'{activity.name}, '
-            student.save()
+                # Convertir las actividades de mejora existentes en un conjunto
+                existing_activities = set(student.areas_mejora.split(", ") if student.areas_mejora else [])
+                # Agregar la nueva actividad al conjunto
+                existing_activities.add(activity.name)
+                # Convertir el conjunto nuevamente en una cadena separada por comas y actualizar el campo
+                student.areas_mejora = ', '.join(existing_activities)
+                student.save()
 
             # Crear una notificación para esta actividad completada con calificación baja
             with transaction.atomic():
@@ -249,8 +258,17 @@ def activity_detail(request, activity_id):
         # Devolver el resultado como JSON
         return JsonResponse({'total_score': total_score, 'final_score': activity.score})
 
-    # Si no es una solicitud POST o si aún no se ha enviado el formulario, renderizar la plantilla con los datos de la actividad y las preguntas
-    return render(request, 'activity_detail.html', {'activity': activity, 'preguntas': pregunta_iterator, 'total_score': total_score})
+    # Verificar si hay actividades de mejora antes de pasarlas al contexto de renderizado
+    if student.areas_mejora:
+        # Dividir las actividades de mejora en una lista y eliminar el último elemento (que sería una cadena vacía)
+        student_activities = student.areas_mejora.split(", ")[:-1]
+    else:
+        # Si no hay actividades de mejora, establecer la lista como vacía
+        student_activities = []
+
+    # Pasar la lista de actividades de mejora al contexto de renderizado
+    return render(request, 'activity_detail.html', {'activity': activity, 'preguntas': pregunta_iterator, 'total_score': total_score, 'student_activities': student_activities})
+
 
 # IMPLEMENTACIÓN DEL PATRON SINGLETON
 
