@@ -6,14 +6,16 @@
     <title>Perfil - SpeakUp</title>
     <style>
         body {
-            font-family: serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #fff;
+            background-color: #f0f7fc;
+            color: #333;
         }
 
         .menu {
-            background-color: #FFEFBA;
+            background-color: #004AAD;
+            color: #fff;
             padding: 10px 0;
             text-align: center;
         }
@@ -30,52 +32,87 @@
         }
 
         .menu ul li a {
-            color: #333;
+            color: #fff;
             text-decoration: none;
             font-weight: bold;
         }
 
         .content {
             padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         h1 {
-            color: #333;
+            color: #000000;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
-        ul {
+        .profile-info {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .profile-info h2 {
+            color: #004AAD;
+            margin-bottom: 10px;
+        }
+
+        .profile-info p {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .progress {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .progress h2 {
+            color: #004AAD;
+            margin-bottom: 10px;
+        }
+
+        .progress ul {
             padding: 0;
             margin: 0;
             list-style: none;
         }
 
-        li {
+        .notifications {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .notifications h2 {
+            color: #004AAD;
             margin-bottom: 10px;
         }
 
-        li a {
-            color: #000000;
-            text-decoration: none;
-        }
-
-        li a:hover {
-            text-decoration: underline;
+        .notifications ul {
+            padding: 0;
+            margin: 0;
+            list-style: none;
         }
 
         footer {
-            background-color: #FFEFBA;
-            color: #000;
+            background-color: #004AAD;
+            color: #fff;
             text-align: center;
             padding: 10px 0;
-            height: 50px; /* Cambia este valor al tamaño deseado */
-            line-height: 50px; /* Igualar la altura del texto con la altura del contenedor */
-            position: fixed;
-            bottom: 0;
-            width: 100%;
         }
 
         footer p {
-            margin: 0; /* Eliminar el margen predeterminado del párrafo */
+            margin: 0;
         }
     </style>
 </head>
@@ -92,30 +129,39 @@
     </div>
 
     <!-- Contenido de la página del perfil del estudiante -->
-<div class="content">
-    <h1>Perfil de {{ student.name }}</h1>
-    <div>
-        <p><strong>Nombre de usuario:</strong> {{ student.user.username }}</p>
-        <p><strong>Nivel de idioma:</strong> {{ student.nivel_idioma }}</p>
-        <p><strong>Áreas de mejora:</strong> {{ student.areas_mejora }}</p>
+    <div class="content">
+        <h1>Perfil de {{ student.name }}</h1>
+
+        <div class="profile-info">
+            <h2>Información Personal</h2>
+            <p><strong>Nombre de usuario:</strong> {{ student.user.username }}</p>
+            <p><strong>Nivel de idioma:</strong> {{ student.nivel_idioma }}</p>
+            <p><strong>Áreas de mejora:</strong> {{ student.areas_mejora }}</p>
+        </div>
+
+        <div class="progress">
+            <h2>Progreso</h2>
+            <ul>
+                {% for item in completed_activities %}
+                <li>{{ item.activity.name }} - Calificación: {{ item.score }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Sección de notificaciones -->
+        <div class="notifications">
+            <h2>Notificaciones</h2>
+            {% if notifications %}
+            <ul>
+                {% for notification in notifications %}
+                <li>{{ notification.message }} - {{ notification.timestamp }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No hay notificaciones.</p>
+            {% endif %}
+        </div>
     </div>
-    <h2>Progreso</h2>
-    <ul>
-        {% for item in completed_activities %}
-        <li>{{ item.activity.name }} - Calificación: {{ item.score }}</li>
-        {% endfor %}
-    </ul>
-    <!-- Sección de notificaciones -->
-    <h2>Notificaciones</h2>
-    {% if notifications %}
-    <ul>
-         {% for notification in notifications %}
-         <li>{{ notification.message }} - {{ notification.timestamp }}</li>
-         {% endfor %}
-    </ul>
-    {% else %}
-      <p>No hay notificaciones.</p>
-    {% endif %}
 
     <!-- Pie de página -->
     <footer>

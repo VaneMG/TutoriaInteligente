@@ -6,8 +6,9 @@
     <title>Registro</title>
     <style>
         body {
-            background-color: #FFEFBA; /* Fondo amarillo bebé */
-            font-family: serif; /* Cambio del tipo de letra a serif */
+            background-color: #004AAD; /* Fondo azul oscuro */
+            font-family: Arial, sans-serif; /* Cambio del tipo de letra a sans-serif */
+            color: #000000; /* Texto negro */
         }
 
         .container {
@@ -21,6 +22,7 @@
 
         h2 {
             text-align: center;
+            color: #000000; /* Color azul oscuro */
         }
 
         form {
@@ -37,6 +39,33 @@
 
         .fieldWrapper label {
             margin-right: 10px;
+            color: #000000; /* Color azul oscuro */
+        }
+
+        .fieldWrapper label {
+            margin-right: 10px;
+            color: #000000; /* Color gris oscuro */
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            color: #333333; /* Color gris oscuro */
+        }
+
+        p {
+            text-align: center;
+            color: #000000; /* Color gris oscuro */
+        }
+
+        p a {
+            color: #2c2d2d; /* Color azul oscuro */
+            text-decoration: underline; /* Subrayado para enlaces */
         }
 
         input[type="text"],
@@ -51,21 +80,18 @@
 
         button[type="submit"] {
             padding: 10px 20px;
-            background-color: #ffffff; /* Fondo blanco */
-            color: #000000; /* Texto negro */
-            border: 1px solid #000000; /* Borde negro */
+            background-color: #004AAD; /* Fondo azul oscuro */
+            color: #ffffff; /* Texto blanco */
+            border: none; /* Sin borde */
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
 
         button[type="submit"]:hover {
-            background-color: #f0f0f0; /* Cambio de color al pasar el mouse */
+            background-color: #003366; /* Cambio de color al pasar el mouse */
         }
 
-        p {
-            text-align: center;
-        }
     </style>
 </head>
 <body>

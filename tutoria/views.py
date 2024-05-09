@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, Auth
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
-from .models import Course, Activity, Student, Progress, OpcionRespuesta, RespuestaUsuario, Pregunta, Notification
+from .models import User, Course, Activity, Student, Progress, OpcionRespuesta, RespuestaUsuario, Pregunta, Notification
 from .recommendation_logic import recommend_activities
 from django.http import JsonResponse
 from django.template.loader import render_to_string
@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.db import IntegrityError 
 from django.core.paginator import Paginator, EmptyPage
 from collections.abc import Iterable, Iterator
+from django.contrib.auth.forms import PasswordChangeForm 
 
 
 def home(request):
@@ -47,17 +48,28 @@ def register(request):
             user = form.save()
             student = Student.objects.create(user=user, name=user.username)
             messages.success(request, '¡Registro exitoso! Ahora puedes iniciar sesión.')
-            return redirect('home')
+            return redirect('login')
         else:
             messages.error(request, '¡El usuario ya existe! Por favor, elige otro nombre de usuario.')
     else:
         form = UserCreationForm()
     return render(request, 'register.html', {'form': form})
 
-@login_required
 def change_password(request):
     if request.method == 'POST':
-        form = PasswordChangeForm(request.user, request.POST)
+        username = request.POST.get('username')
+        old_password = request.POST.get('old_password')
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password2')
+
+        # Verificar si el nombre de usuario y la contraseña coinciden
+        user = User.objects.filter(username=username).first()
+        if not user or not user.check_password(old_password):
+            messages.error(request, 'El nombre de usuario y la contraseña no coinciden.')
+            return redirect('change_password')
+
+        # Crear el formulario para cambiar la contraseña
+        form = PasswordChangeForm(user, request.POST)
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)  

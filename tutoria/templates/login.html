@@ -8,13 +8,24 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: serif; /* Cambio de tipo de letra a serif */
-            background-color: #FFEFBA; /* Color amarillo bebé */
-            color: black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            font-family: Arial, sans-serif; /* Cambio de tipo de letra a sans-serif */
+            background-color: #f0f7fc; /* Color de fondo azul claro */
+            color: #333; /* Color del texto */
+        }
+
+        .header {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .header h1 {
+            font-size: 45px; /* Tamaño de letra más grande */
+            color: #004AAD; /* Color azul oscuro */
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #004AAD; /* Color azul oscuro */
         }
 
         .container {
@@ -23,6 +34,8 @@
             justify-content: space-around; /* Alineación de los paneles */
             height: 90%;
             width: 90%;
+            margin: auto;
+            margin-top: 50px;
         }
 
         .left-panel {
@@ -31,18 +44,16 @@
             padding: 20px;
         }
 
-        .left-panel h1 {
-            font-size: 36px;
+        .left-panel img {
+            width: auto;
+            height: 100%; /* Hacer que la imagen ocupe toda la altura del panel */
+            max-height: 100%; /* Asegurar que la imagen no se extienda más allá de la altura del panel */
             margin-bottom: 20px;
-        }
-
-        .left-panel p {
-            font-size: 18px;
         }
 
         .right-panel {
             width: 40%; /* Ajustar el ancho del panel derecho */
-            background-color: white; /* Fondo blanco para el recuadro de inicio de sesión */
+            background-color: #004AAD; /* Fondo azul oscuro para el recuadro de inicio de sesión */
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
@@ -55,6 +66,8 @@
         .right-panel h2 {
             font-size: 24px; /* Texto de "Iniciar Sesión" más grande */
             margin-bottom: 20px;
+            color: #fff; /* Color blanco para el título */
+            text-align: center; /* Centrar el texto */
         }
 
         .right-panel form {
@@ -68,44 +81,57 @@
         .right-panel input[type="text"],
         .right-panel input[type="password"] {
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
 
         .right-panel button {
-            background-color: white; /* Botón de "Iniciar Sesión" de color blanco */
-            color: black; /* Texto del botón */
-            border: 1px solid black; /* Borde de color negro */
+            background-color: #add8e6; /* Botón de "Iniciar Sesión" de color azul bebé */
+            color: #000; /* Texto del botón */
+            border: none; /* Sin borde */
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s, color 0.3s;
+            margin-bottom: 70px; /* Agregar margen inferior */
         }
 
         .right-panel button:hover {
-            background-color: black; /* Cambio de color al pasar el mouse */
-            color: white;
+            background-color: #8ab6d6; /* Cambio de color al pasar el mouse */
         }
 
         .right-panel p {
-            margin-bottom: 10px;
+            margin-bottom: 20px; /* Agregar más margen inferior */
+            color: #ffffff; /* Color gris claro para el texto adicional */
+        }
+
+        .right-panel p a {
+            color: #ffffff; /* Cambio de color a gris claro */
+            text-decoration: underline; 
         }
 
         /* Estilo para mensajes de error */
         .error-message {
-            color: black;
+            color: #dc3545; /* Color rojo para los mensajes de error */
             font-size: 14px;
             margin-top: 5px;
+            list-style-type: none; /* Sin viñetas */
+            padding: 0;
         }
     </style>
 </head>
 <body>
+    <!-- Encabezado -->
+    <div class="header">
+        <h1>¡Bienvenido a Speak Up!</h1>
+        <p>Inicia sesión para empezar a aprender.</p>
+    </div>
+
     <div class="container">
         <div class="left-panel">
-            <h1>Bienvenido a SpeakUp!</h1>
-            <p>Inicia sesión para empezar a aprender.</p>
+            <img src="https://raw.githubusercontent.com/VaneMG/Imagen/main/Logo.png" alt="Logo">
         </div>
         <div class="right-panel">
             <div class="login-box">

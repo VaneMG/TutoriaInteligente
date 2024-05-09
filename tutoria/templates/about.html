@@ -6,17 +6,30 @@
     <title>Así funciona - SpeakUp</title>
     <style>
         body {
-            font-family: serif;
+            font-family: "Arial", sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f3f3f3;
+            color: #000; /* Texto negro */
         }
 
-        header {
-            background-color: #FFEFBA;
-            color: #000;
+        header{
+            background-color: #004AAD; /* Azul */
+            color: #fff; /* Texto blanco */
             padding: 10px 0;
             text-align: center;
+        }
+
+        footer {
+            background-color: #004AAD; /* Azul */
+            color: #fff; /* Texto blanco */
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            margin-top: 20px; /* Ajusta este valor según sea necesario */
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
         }
 
         .menu ul {
@@ -26,48 +39,64 @@
         }
 
         .menu ul li {
-            display: inline;
+            display: inline-block;
             margin-right: 20px;
         }
 
         .menu ul li a {
-            color: #000;
+            color: #fff; /* Texto blanco */
             text-decoration: none;
             font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .menu ul li a:hover {
+            color: #ddd; /* Texto gris claro al pasar el mouse */
         }
 
         .content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch;
             padding: 20px;
+            height: calc(100vh - 170px); /* Alto de la pantalla menos el encabezado y el pie de página */
         }
 
-        #info {
-            margin-bottom: 30px;
+        .panel {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex: 1;
+            margin: 10px;
+            height: 100%;
         }
 
-        footer {
-            background-color: #FFEFBA;
-            color: #000;
+        .panel h2 {
+            color: #004AAD; /* Azul */
+            text-align: center; /* Centrar títulos */
+            margin-bottom: 10px;
+        }
+
+        .panel p {
+            color: #000; /* Texto negro */
+        }
+
+        .panel ul {
+            color: #000; /* Texto negro */
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        .title {
             text-align: center;
-            padding: 10px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            left: 0;
-            height: 50px; /* Cambia este valor al tamaño deseado */
-        }
-
-        button {
-            background-color: #FFEFBA;
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin-top: 20px;
-            cursor: pointer;
-            border-radius: 5px;
+            color: #000000;
+            font-size: 36px;
+            margin-bottom: 20px;
+            flex: 100%; /* Ocupar todo el ancho */
         }
     </style>
 </head>
@@ -85,21 +114,30 @@
     </header>
 
     <!-- Contenido de la página "Así funciona" -->
-    <div class="content">
-        <h1>Así funciona SpeakOut</h1>
-        <div id="info">
+    <div class="content" style="height: calc(100vh - 170px);">
+        <div class="title">Así funciona Speak Up</div>
+
+        <div class="panel">
             <h2>¿Para qué sirve la aplicación?</h2>
             <p>SpeakOut es una aplicación diseñada para ayudarte a mejorar tus habilidades de comunicación en un idioma extranjero. Proporciona una plataforma interactiva y personalizada para aprender idiomas de manera efectiva y divertida.</p>
+        </div>
 
+        <div class="panel">
             <h2>Objetivo</h2>
             <p>Nuestro objetivo es hacer que el aprendizaje de idiomas sea accesible para todos, independientemente de su nivel de experiencia previa. Queremos que los usuarios se sientan motivados y comprometidos con su proceso de aprendizaje.</p>
+        </div>
 
+        <div class="panel">
             <h2>Misión</h2>
             <p>Nuestra misión es facilitar un entorno de aprendizaje inclusivo y colaborativo, donde los usuarios puedan desarrollar sus habilidades lingüísticas de manera significativa. Nos comprometemos a ofrecer contenido educativo de calidad y herramientas efectivas para el aprendizaje.</p>
+        </div>
 
+        <div class="panel">
             <h2>Visión</h2>
             <p>Nuestra visión es convertirnos en la principal herramienta de aprendizaje de idiomas en línea, reconocida por su calidad y efectividad en todo el mundo. Queremos ser una fuente confiable y accesible para todos aquellos que deseen mejorar sus habilidades lingüísticas y alcanzar sus metas personales y profesionales.</p>
+        </div>
 
+        <div class="panel">
             <h2>Valores</h2>
             <ul>
                 <li>Calidad</li>
@@ -109,8 +147,7 @@
                 <li>Compromiso</li>
             </ul>
         </div>
-
-   </div>
+    </div>
 
     <!-- Pie de página -->
     <footer>

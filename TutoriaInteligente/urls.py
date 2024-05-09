@@ -10,7 +10,6 @@ urlpatterns = [
     path('register/', views.register, name='register'),  # Ruta para el registro de nuevos usuarios
     path('change_password/', views.change_password, name='change_password'),  # Ruta para cambiar la contraseña del usuario
     path('accounts/login/', views.login_view, name='login'),  # Ruta para el inicio de sesión personalizado
-    # Elimina la inclusión de las URLs de autenticación proporcionadas por Django
     path('logout/', views.logout_view, name='logout'),  # Asegúrate de definir esta URL
     path('about/', views.about, name='about'),  # Ruta para la página "About"
     path('profile/', views.profile, name='profile'),  # Ruta para la página "Profile"
