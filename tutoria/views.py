@@ -210,23 +210,23 @@ def activity_detail(request, activity_id):
         activity.save()
 
         # Si el puntaje es menor o igual a 50, agregar el nombre de la actividad a areas_mejora del estudiante
-        if final_score <= 50:
+        if final_score <= 50 and activity.id != 1:
             if student.areas_mejora is None:
                   student.areas_mejora = ''
-        # Verificar si el nombre de la actividad ya está en areas_mejora
-        if activity.name not in student.areas_mejora:
-            student.areas_mejora += f'{activity.name}, '
-            student.save()
+            # Verificar si el nombre de la actividad ya está en areas_mejora
+            if activity.name not in student.areas_mejora:
+                student.areas_mejora += f'{activity.name}, '
+                student.save()
 
 
-        # Crear una notificación para esta actividad completada con calificación baja
-        with transaction.atomic():
-            notification_message = f"Has completado la actividad '{activity.name}' con una calificación baja."
-            try:
-                new_notification = Notification.objects.create(student=student, message=notification_message, timestamp=timezone.now())
-                print("Nueva notificación creada:", new_notification)    
-            except IntegrityError as e:
-                print("Error al crear la notificación:", e)
+            # Crear una notificación para esta actividad completada con calificación baja
+            with transaction.atomic():
+                notification_message = f"Has completado la actividad '{activity.name}' con una calificación baja."
+                try:
+                    new_notification = Notification.objects.create(student=student, message=notification_message, timestamp=timezone.now())
+                    print("Nueva notificación creada:", new_notification)    
+                except IntegrityError as e:
+                    print("Error al crear la notificación:", e)
 
         # Actualizar el progreso del estudiante
         with transaction.atomic():
@@ -261,7 +261,7 @@ def activity_detail(request, activity_id):
 
     # Verificar si la calificación es igual o menor a 50 para mostrar las recomendaciones de material
     mostrar_recomendaciones = False
-    if activity.score is not None and activity.score <= 50:
+    if activity.score is not None and activity.score <= 50 and activity.id != 1:
         mostrar_recomendaciones = True
 
     # Verificar si hay actividades de mejora antes de pasarlas al contexto de renderizado
