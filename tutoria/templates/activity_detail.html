@@ -51,8 +51,6 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
-            display: inline-block; /* Ajusta el ancho al contenido */
-            text-align: left; /* Alinea el contenido a la izquierda */
             max-width: 600px;
             margin: 0 auto; /* Centra el formulario horizontalmente */
         }
@@ -101,6 +99,7 @@
             max-width: 600px;
             margin: 0 auto; /* Centra el contenedor de resultados horizontalmente */
             text-align: left; /* Alinea el contenido a la izquierda */
+            display: none; /* Oculta el contenedor de resultados inicialmente */
         }
 
         .result-container p {
@@ -110,6 +109,7 @@
 
         #back-to-activities-container {
             text-align: center;
+            display: none; /* Oculta el botón de volver a actividades inicialmente */
         }
 
         #back-to-activities-container button {
@@ -172,12 +172,28 @@
             <button type="submit" class="submit-button" id="submit-button">Enviar respuestas</button>
         </form>
     
-        <div class="result-container" id="result-container" style="display: none;">
+        <div class="result-container" id="result-container">
             <p>Puntaje total: <span id="total-score"></span></p>
             <p>Calificación final: <span id="final-score"></span></p>
+
+            {% if mostrar_recomendaciones %}
+            <div class="recommendation-container">
+                <h2>Recomendaciones de Material</h2>
+                <ul>
+                    {% for recomendacion in recomendaciones %}
+                    <li>{{ recomendacion.titulo }}:</li>
+                    <ul>
+                        {% for url in recomendacion.obtener_lista_urls %}
+                        <li><a href="{{ url }}" target="_blank">{{ url }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
         </div>
-    
-        <div id="back-to-activities-container" style="display: none;">
+        
+        <div id="back-to-activities-container">
             <a href="{% url 'activities' %}"><button>Volver a Actividades</button></a>
         </div>
     </div>
@@ -193,7 +209,7 @@
                 var form = document.getElementById('activity-form');
                 var preguntas = form.querySelectorAll('.question');
                 var todasPreguntasRespondidas = true;
-    
+
                 preguntas.forEach(function(pregunta) {
                     var opciones = pregunta.querySelectorAll('input[type="radio"]');
                     var respondida = Array.prototype.slice.call(opciones).some(function(opcion) {
@@ -208,7 +224,7 @@
                         pregunta.style.color = 'inherit';
                     }
                 });
-    
+
                 if (todasPreguntasRespondidas) {
                     var url = form.getAttribute('data-url');
                     var formData = new FormData(form);
@@ -221,9 +237,9 @@
                                 var response = JSON.parse(xhr.responseText);
                                 document.getElementById('total-score').innerText = response.total_score;
                                 document.getElementById('final-score').innerText = response.final_score;
-                                document.getElementById('result-container').style.display = 'block';
+                                document.getElementById('result-container').style.display = 'block'; // Muestra el contenedor de resultados
                                 document.getElementById('back-to-activities-container').style.display = 'block';
-                                document.getElementById('activity-form').style.display = 'none';
+                                document.getElementById('activity-form').style.display = 'none'; // Oculta el formulario de preguntas
                             }
                         }
                     };

@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, Auth
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
-from .models import User, Course, Activity, Student, Progress, OpcionRespuesta, RespuestaUsuario, Pregunta, Notification
+from .models import User, Recomendacion, Course, Activity, Student, Progress, OpcionRespuesta, RespuestaUsuario, Pregunta, Notification
 from .recommendation_logic import recommend_activities
 from django.http import JsonResponse
 from django.template.loader import render_to_string
@@ -212,23 +212,21 @@ def activity_detail(request, activity_id):
         # Si el puntaje es menor o igual a 50, agregar el nombre de la actividad a areas_mejora del estudiante
         if final_score <= 50:
             if student.areas_mejora is None:
-                student.areas_mejora = ''
-                # Convertir las actividades de mejora existentes en un conjunto
-                existing_activities = set(student.areas_mejora.split(", ") if student.areas_mejora else [])
-                # Agregar la nueva actividad al conjunto
-                existing_activities.add(activity.name)
-                # Convertir el conjunto nuevamente en una cadena separada por comas y actualizar el campo
-                student.areas_mejora = ', '.join(existing_activities)
-                student.save()
+                  student.areas_mejora = ''
+        # Verificar si el nombre de la actividad ya está en areas_mejora
+        if activity.name not in student.areas_mejora:
+            student.areas_mejora += f'{activity.name}, '
+            student.save()
 
-            # Crear una notificación para esta actividad completada con calificación baja
-            with transaction.atomic():
-                notification_message = f"Has completado la actividad '{activity.name}' con una calificación baja."
-                try:
-                    new_notification = Notification.objects.create(student=student, message=notification_message, timestamp=timezone.now())
-                    print("Nueva notificación creada:", new_notification)    
-                except IntegrityError as e:
-                    print("Error al crear la notificación:", e)
+
+        # Crear una notificación para esta actividad completada con calificación baja
+        with transaction.atomic():
+            notification_message = f"Has completado la actividad '{activity.name}' con una calificación baja."
+            try:
+                new_notification = Notification.objects.create(student=student, message=notification_message, timestamp=timezone.now())
+                print("Nueva notificación creada:", new_notification)    
+            except IntegrityError as e:
+                print("Error al crear la notificación:", e)
 
         # Actualizar el progreso del estudiante
         with transaction.atomic():
@@ -258,6 +256,14 @@ def activity_detail(request, activity_id):
         # Devolver el resultado como JSON
         return JsonResponse({'total_score': total_score, 'final_score': activity.score})
 
+    # Obtener las recomendaciones relacionadas con la actividad
+    recomendaciones = Recomendacion.objects.filter(activity=activity)
+
+    # Verificar si la calificación es igual o menor a 50 para mostrar las recomendaciones de material
+    mostrar_recomendaciones = False
+    if activity.score is not None and activity.score <= 50:
+        mostrar_recomendaciones = True
+
     # Verificar si hay actividades de mejora antes de pasarlas al contexto de renderizado
     if student.areas_mejora:
         # Dividir las actividades de mejora en una lista y eliminar el último elemento (que sería una cadena vacía)
@@ -267,7 +273,7 @@ def activity_detail(request, activity_id):
         student_activities = []
 
     # Pasar la lista de actividades de mejora al contexto de renderizado
-    return render(request, 'activity_detail.html', {'activity': activity, 'preguntas': pregunta_iterator, 'total_score': total_score, 'student_activities': student_activities})
+    return render(request, 'activity_detail.html', {'activity': activity, 'preguntas': pregunta_iterator, 'total_score': total_score, 'student_activities': student_activities, 'mostrar_recomendaciones': mostrar_recomendaciones, 'recomendaciones': recomendaciones})
 
 
 # IMPLEMENTACIÓN DEL PATRON SINGLETON

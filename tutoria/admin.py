@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Course, Activity, Progress, Pregunta, OpcionRespuesta, RespuestaUsuario, Notification
+from .models import Student, Recomendacion, Course, Activity, Progress, Pregunta, OpcionRespuesta, RespuestaUsuario, Notification
 
 admin.site.register(Student)
 admin.site.register(Course)
@@ -9,3 +9,4 @@ admin.site.register(Pregunta)
 admin.site.register(OpcionRespuesta)
 admin.site.register(RespuestaUsuario)
 admin.site.register(Notification)
+admin.site.register(Recomendacion)

@@ -89,3 +89,15 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.message
+
+class Recomendacion(models.Model):
+    activity = models.ForeignKey('Activity', on_delete=models.CASCADE)
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField()
+    urls_material = models.TextField(help_text="Ingresa los URLs del material, separados por comas.")
+
+    def obtener_lista_urls(self):
+        return self.urls_material.split(',')
+
+    def __str__(self):
+        return f"{self.titulo} - {self.activity.name}"
